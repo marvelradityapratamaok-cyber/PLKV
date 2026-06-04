@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WEB INFO PLKV</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="WhatsApp Image 2026-06-04 at 16.58.32.jpeg">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-active { background: #1e40af; color: #fff; box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2); }
+    .modal-backdrop { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+    .priority-urgent { border-left: 5px solid #ef4444; }
+    .priority-biasa { border-left: 5px solid #3b82f6; }
+    .priority-rendah { border-left: 5px solid #10b981; }
+    .task-done { opacity: 0.65; background-color: #f8fafc; }
+    .task-done h3 { text-decoration: line-through; color: #64748b; }
+    .view-tab-active { border-bottom: 3px solid #1e40af; color: #1e40af; font-weight: 700; }
+    .custom-scroll::-webkit-scrollbar { height: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen w-full text-slate-800 antialiased pb-12">
+  
+  <header class="relative h-56 sm:h-64 md:h-72 overflow-hidden shadow-md">
+    <img class="w-full h-full object-cover object-center" loading="lazy" src="plkv.jpeg" alt="Classroom">
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent flex items-end p-6 sm:p-8">
+      <div class="max-w-6xl mx-auto w-full">
+        <span class="bg-blue-600 text-white text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md shadow-sm mb-2 inline-block">Akademik</span>
+        <h1 class="text-white font-extrabold text-2xl sm:text-3xl md:text-4xl tracking-tight drop-shadow-md">Papan Tugas Kelas X PLKV</h1>
+        <p class="text-slate-200 text-xs sm:text-sm mt-1 max-w-xl font-medium opacity-90">Sistem informasi kelas mandiri dengan penyimpanan lokal.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-6xl mx-auto px-4">
+    
+    <section class="py-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-4 transition hover:shadow-md">
+          <div class="p-3 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="book-open" class="w-6 h-6"></i></div>
+          <div>
+            <div class="text-2xl font-bold tracking-tight text-slate-900" id="stat-total-num">0</div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Tugas</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-4 transition hover:shadow-md">
+          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
+          <div>
+            <div class="text-2xl font-bold tracking-tight text-emerald-600" id="stat-done-num">0</div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Selesai</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-4 transition hover:shadow-md">
+          <div class="p-3 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
+          <div>
+            <div class="text-2xl font-bold tracking-tight text-rose-600" id="stat-urgent-num">0</div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Urgent</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center gap-4 transition hover:shadow-md">
+          <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><i data-lucide="users" class="w-6 h-6"></i></div>
+          <div>
+            <div class="text-2xl font-bold tracking-tight text-indigo-600" id="stat-attend-num">0</div>
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hadir Hari Ini</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pb-6">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 shrink-0 animate-pulse">
+            <i data-lucide="alarm-clock" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mendekati Batas Pengumpulan</div>
+            <div class="font-bold text-slate-800 text-sm sm:text-base mt-0.5" id="countdown-text">Tidak ada deadline aktif</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="border-b border-slate-200 mb-6 overflow-hidden">
+      <div class="flex gap-6 overflow-x-auto custom-scroll pb-px" id="view-tabs">
+        <button class="view-tab view-tab-active py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-600" data-view="tugas"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Tugas Kelas</button> 
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="pengumuman"><i data-lucide="megaphone" class="w-4 h-4"></i> Pengumuman</button> 
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="jadwal"><i data-lucide="calendar" class="w-4 h-4"></i> Jadwal Pelajaran</button> 
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="catatan"><i data-lucide="file-text" class="w-4 h-4"></i> Catatan</button> 
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="absen"><i data-lucide="user-check" class="w-4 h-4"></i> Presensi</button> 
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="kas"><i data-lucide="wallet" class="w-4 h-4"></i> Kas Kelas</button> 
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="galeri"><i data-lucide="image" class="w-4 h-4"></i> Galeri Kelas</button>
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="guru"><i data-lucide="graduation-cap" class="w-4 h-4"></i> Data Guru</button> 
+        <button class="view-tab py-3 px-1 text-sm font-semibold whitespace-nowrap transition flex items-center gap-2 text-slate-500 hover:text-blue-700" data-view="kontak"><i data-lucide="contact-2" class="w-4 h-4"></i> Kontak Teman</button> 
+      </div>
+    </nav>
+
+    <main>
+      <div id="view-tugas" class="view-content">
+        <div class="bg-white p-2.5 rounded-2xl shadow-sm border border-slate-100 mb-4 overflow-hidden">
+          <div class="flex gap-1.5 overflow-x-auto custom-scroll py-1" id="subject-tabs">
+            <button class="subject-tab tab-active whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold transition" data-subject="all">Semua Mapel</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="IPAS">IPAS</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="PKN">PKN</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="B. Indonesia">B. Indonesia</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="B. Sunda">B. Sunda</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="B. Inggris">B. Inggris</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="PABP">PABP</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="PJOK">PJOK</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="Seni Budaya">Seni Budaya</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="Informatika">Informatika</button> 
+            <button class="subject-tab whitespace-nowrap px-4 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-600 transition" data-subject="Matematika">Matematika</button>
+          </div>
+        </div>
+        <div class="flex gap-3 mb-5">
+          <button class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm bg-blue-600 hover:bg-blue-700 text-white transition tracking-wide" onclick="showModal('task-modal')"><i data-lucide="plus" class="w-4 h-4"></i> TAMBAH TUGAS</button> 
+          <button class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white transition tracking-wide" onclick="showModal('absen-modal')"><i data-lucide="user-check" class="w-4 h-4"></i> PRESENSI MASUK</button>
+        </div>
+        <div id="task-list" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+        <div id="empty-msg" class="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200 hidden">
+          <i data-lucide="folder-open" class="w-12 h-12 text-slate-300 mx-auto mb-2"></i>
+          <p class="text-slate-400 text-sm font-medium italic">Belum ada tugas tercatat. Santai dulu atau tambah tugas baru!</p>
+        </div>
+      </div>
+
+      <div id="view-pengumuman" class="view-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="megaphone" class="w-5 h-5 text-amber-500"></i> Informasi & Pengumuman</h2>
+          <button class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition" onclick="showModal('announce-modal')"><i data-lucide="plus" class="w-3.5 h-3.5"></i> BUAT BARU</button>
+        </div>
+        <div id="announce-list" class="space-y-3"></div>
+        <div id="announce-empty" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 hidden">
+          <p class="text-slate-400 text-sm italic">Mading kelas kosong mending aman terkendali.</p>
+        </div>
+      </div>
+
+      <div id="view-jadwal" class="view-content hidden">
+        <h2 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i> Jadwal Pelajaran Mingguan</h2>
+        <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+          <table class="w-full text-sm text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                <th class="px-4 py-3 rounded-l-xl">Hari</th>
+                <th class="px-4 py-3">07:00</th>
+                <th class="px-4 py-3">08:30</th>
+                <th class="px-4 py-3">10:00</th>
+                <th class="px-4 py-3">11:30</th>
+                <th class="px-4 py-3 rounded-r-xl">13:00</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+              <tr class="hover:bg-slate-50/80 transition"><td class="px-4 py-3.5 font-bold text-blue-600">Senin</td><td class="px-4 py-3.5">IPAS</td><td class="px-4 py-3.5">Matematika</td><td class="px-4 py-3.5">B. Indonesia</td><td class="px-4 py-3.5">PKN</td><td class="px-4 py-3.5">PJOK</td></tr>
+              <tr class="hover:bg-slate-50/80 transition"><td class="px-4 py-3.5 font-bold text-blue-600">Selasa</td><td class="px-4 py-3.5">B. Inggris</td><td class="px-4 py-3.5">PABP</td><td class="px-4 py-3.5">Informatika</td><td class="px-4 py-3.5">Seni Budaya</td><td class="px-4 py-3.5">B. Sunda</td></tr>
+              <tr class="hover:bg-slate-50/80 transition"><td class="px-4 py-3.5 font-bold text-blue-600">Rabu</td><td class="px-4 py-3.5">Matematika</td><td class="px-4 py-3.5">IPAS</td><td class="px-4 py-3.5">B. Inggris</td><td class="px-4 py-3.5">PABP</td><td class="px-4 py-3.5">PKN</td></tr>
+              <tr class="hover:bg-slate-50/80 transition"><td class="px-4 py-3.5 font-bold text-blue-600">Kamis</td><td class="px-4 py-3.5">B. Indonesia</td><td class="px-4 py-3.5">Seni Budaya</td><td class="px-4 py-3.5">IPAS</td><td class="px-4 py-3.5">Informatika</td><td class="px-4 py-3.5">B. Sunda</td></tr>
+              <tr class="hover:bg-slate-50/80 transition"><td class="px-4 py-3.5 font-bold text-blue-600">Jumat</td><td class="px-4 py-3.5">PJOK</td><td class="px-4 py-3.5">Matematika</td><td class="px-4 py-3.5">PABP</td><td class="px-4 py-3.5 text-slate-300">-</td><td class="px-4 py-3.5 text-slate-300">-</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="view-catatan" class="view-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5 text-violet-500"></i> Catatan Materi Pelajaran</h2>
+          <button class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-sm transition" onclick="showModal('note-modal')"><i data-lucide="plus" class="w-3.5 h-3.5"></i> TAMBAH CATATAN</button>
+        </div>
+        <div id="note-list" class="grid gap-4 sm:grid-cols-2"></div>
+        <div id="note-empty" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 hidden">
+          <p class="text-slate-400 text-sm italic">Belum ada rangkuman materi di sini.</p>
+        </div>
+      </div>
+
+      <div id="view-absen" class="view-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="user-check" class="w-5 h-5 text-emerald-600"></i> Log Riwayat Absensi Kelas</h2>
+          <button onclick="clearData('absen')" class="text-xs font-semibold text-rose-500 hover:underline">Reset Absen</button>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 overflow-hidden">
+          <div id="absen-list" class="divide-y divide-slate-100"></div>
+          <div id="absen-empty" class="text-center py-8 text-slate-400 text-sm italic hidden">Hari ini belum ada presensi siswa masuk.</div>
+        </div>
+      </div>
+
+      <div id="view-kas" class="view-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="wallet" class="w-5 h-5 text-emerald-500"></i> Manajemen Transaksi Kas</h2>
+          <button class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition" onclick="showModal('kas-modal')"><i data-lucide="plus" class="w-3.5 h-3.5"></i> INPUT KAS</button>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-6 text-white shadow-md mb-6 flex items-center justify-between">
+          <div>
+            <div class="text-emerald-100 text-xs font-bold uppercase tracking-wider">Total Kas Terkumpul</div>
+            <div class="text-3xl font-extrabold tracking-tight mt-1" id="kas-saldo">Rp 0</div>
+          </div>
+          <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm"><i data-lucide="banknote" class="w-7 h-7 text-emerald-100"></i></div>
+        </div>
+        <div class="space-y-2" id="kas-list"></div>
+        <div id="kas-empty" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 hidden">
+          <p class="text-slate-400 text-sm italic">Buku kas bersih tanpa transaksi baru.</p>
+        </div>
+      </div>
+
+      <div id="view-galeri" class="view-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="image" class="w-5 h-5 text-blue-500"></i> Galeri Dokumentasi Kegiatan Kelas</h2>
+          <button class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition" onclick="showModal('galeri-modal')"><i data-lucide="plus" class="w-3.5 h-3.5"></i> UNGGAH FOTO</button>
+        </div>
+        <div id="galeri-list" class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
+        <div id="galeri-empty" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 hidden">
+          <p class="text-slate-400 text-sm italic">Belum ada kenangan foto yang diunggah di sini.</p>
+        </div>
+      </div>
+
+      <div id="view-guru" class="view-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-500"></i> Database Kontak Guru Pengajar</h2>
+          <button class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition" onclick="showModal('guru-modal')"><i data-lucide="plus" class="w-3.5 h-3.5"></i> TAMBAH BARU</button>
+        </div>
+        <div id="guru-list" class="grid gap-4 sm:grid-cols-2"></div>
+        <div id="guru-empty" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 hidden">
+          <p class="text-slate-400 text-sm italic">Kontak guru belum ditambahkan.</p>
+        </div>
+      </div>
+
+      <div id="view-kontak" class="view-content hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="contact-2" class="w-5 h-5 text-blue-500"></i> Buku Telepon Anggota Kelas</h2>
+          <button class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition" onclick="showModal('kontak-modal')"><i data-lucide="plus" class="w-3.5 h-3.5"></i> TAMBAH KONTAK</button>
+        </div>
+        <div id="kontak-list" class="grid gap-3 sm:grid-cols-2 md:grid-cols-3"></div>
+        <div id="kontak-empty" class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 hidden">
+          <p class="text-slate-400 text-sm italic">Daftar nama teman kelas masih kosong.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      <div>Papan Tugas Kelas X PLKV &copy; 2026. Sinkronisasi Data Lokal Aktif.</div>
+    </footer>
+  </div>
+
+  <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto transform transition-all">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5 text-blue-600"></i> Tambah Tugas Baru</h2>
+        <button onclick="hideModal('task-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="task-form" class="space-y-4" onsubmit="handleTaskSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-subject">Mata Pelajaran</label>
+          <select id="f-subject" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+            <option value="">Pilih mapel</option><option>IPAS</option><option>PKN</option><option>B. Indonesia</option><option>B. Sunda</option><option>B. Inggris</option><option>PABP</option><option>PJOK</option><option>Seni Budaya</option><option>Informatika</option><option>Matematika</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-title">Judul Tugas / Materi</label>
+          <input id="f-title" type="text" placeholder="Contoh: LKS Halaman 45" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-desc">Instruksi Tambahan</label>
+          <textarea id="f-desc" rows="3" placeholder="Deskripsikan detail pengerjaan..." class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-task-img">Foto Lampiran Tugas (Opsional)</label>
+          <input id="f-task-img" type="file" accept="image/*" class="w-full text-xs text-slate-500 border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-date">Batas Tanggal</label>
+            <input id="f-date" type="date" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-time">Jam</label>
+            <input id="f-time" type="time" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-priority">Tingkat Kepentingan</label>
+          <select id="f-priority" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
+            <option value="biasa">Biasa (Biru)</option><option value="urgent">Urgent / Mendesak (Merah)</option><option value="rendah">Rendah / Santai (Hijau)</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 transition tracking-wide">SIMPAN TUGAS KELAS</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="absen-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="user-check" class="w-5 h-5 text-emerald-600"></i> Absen Presensi Kelas</h2>
+        <button onclick="hideModal('absen-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="absen-form" class="space-y-4" onsubmit="handleAbsenSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-name">Nama Siswa</label>
+          <input id="f-name" type="text" placeholder="Ketik nama lengkap..." class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-status">Keterangan Status</label>
+          <select id="f-status" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" required>
+            <option value="Hadir">Hadir</option><option value="Izin">Izin (Keperluan)</option><option value="Sakit">Sakit</option><option value="Alpha">Alpha</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition tracking-wide">KIRIM ABSENSI</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="announce-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="megaphone" class="w-5 h-5 text-amber-500"></i> Posting Pengumuman Baru</h2>
+        <button onclick="hideModal('announce-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="announce-form" class="space-y-4" onsubmit="handleAnnounceSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-ann-title">Judul Topik</label>
+          <input id="f-ann-title" type="text" placeholder="Contoh: Info Iuran Seragam Pengurus" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-ann-desc">Detail Informasi</label>
+          <textarea id="f-ann-desc" rows="4" placeholder="Tulis rincian berita acara pengumuman disini..." class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white" required></textarea>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-amber-500 hover:bg-amber-600 shadow-md shadow-amber-500/20 transition tracking-wide">SIARKAN PENGUMUMAN</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="note-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5 text-violet-500"></i> Buat Catatan Ringkas</h2>
+        <button onclick="hideModal('note-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="note-form" class="space-y-4" onsubmit="handleNoteSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-note-subject">Mata Pelajaran Kelompok</label>
+          <select id="f-note-subject" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:bg-white" required>
+            <option value="">Pilih mapel</option><option>IPAS</option><option>PKN</option><option>B. Indonesia</option><option>B. Sunda</option><option>B. Inggris</option><option>PABP</option><option>PJOK</option><option>Seni Budaya</option><option>Informatika</option><option>Matematika</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-note-content">Rangkuman / Catatan</label>
+          <textarea id="f-note-content" rows="5" placeholder="Tulis rumus penting, ringkasan bab, atau link berkas eksternal..." class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:bg-white" required></textarea>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-violet-600 hover:bg-violet-700 shadow-md shadow-violet-500/20 transition tracking-wide">SIMPAN RANGKUMAN</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="kas-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="wallet" class="w-5 h-5 text-emerald-600"></i> Catat Jurnal Kas Kelas</h2>
+        <button onclick="hideModal('kas-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="kas-form" class="space-y-4" onsubmit="handleKasSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-kas-type">Aliran Dana</label>
+          <select id="f-kas-type" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" required>
+            <option value="masuk">Uang Masuk / Pemasukan Kas</option>
+            <option value="keluar">Uang Keluar / Pengeluaran Belanja</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-kas-name">Keterangan / Penanggung Jawab</label>
+          <input id="f-kas-name" type="text" placeholder="Contoh: Kas Mingguan Budi atau Beli Spidol" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-kas-amount">Nominal Rupiah</label>
+          <input id="f-kas-amount" type="number" placeholder="Contoh: 5000" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" required>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-500/20 transition tracking-wide">SIMPAN LOG KAS</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="galeri-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="image" class="w-5 h-5 text-blue-600"></i> Unggah Dokumentasi</h2>
+        <button onclick="hideModal('galeri-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="galeri-form" class="space-y-4" onsubmit="handleGaleriSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-gal-title">Nama Kegiatan</label>
+          <input id="f-gal-title" type="text" placeholder="Contoh: Kerja Bakti Kelas" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-gal-img">Pilih File Foto</label>
+          <input id="f-gal-img" type="file" accept="image/*" class="w-full text-xs text-slate-500 border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 focus:outline-none" required>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-blue-600 hover:bg-blue-700 shadow-md transition">UNGGAH SEKARANG</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="guru-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-600"></i> Tambah Data Guru</h2>
+        <button onclick="hideModal('guru-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="guru-form" class="space-y-4" onsubmit="handleGuruSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-guru-name">Nama Guru & Gelar</label>
+          <input id="f-guru-name" type="text" placeholder="Contoh: Dra. Sri Wahyuni" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-guru-subject">Mengajar Mapel</label>
+          <input id="f-guru-subject" type="text" placeholder="Contoh: Matematika" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-guru-phone">No. WhatsApp / Kontak</label>
+          <input id="f-guru-phone" type="text" placeholder="Contoh: 08123456789" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition">SIMPAN DATA GURU</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="kontak-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <div class="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i data-lucide="contact-2" class="w-5 h-5 text-blue-600"></i> Tambah Kontak Teman</h2>
+        <button onclick="hideModal('kontak-modal')" class="p-1.5 text-slate-400 hover:bg-slate-100 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="kontak-form" class="space-y-4" onsubmit="handleKontakSubmit(event)">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-kon-name">Nama Teman</label>
+          <input id="f-kon-name" type="text" placeholder="Nama Panggilan / Lengkap" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-kon-role">Jabatan / Keterangan</label>
+          <input id="f-kon-role" type="text" placeholder="Contoh: Ketua Kelas / Anggota" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1" for="f-kon-phone">Nomor Telepon</label>
+          <input id="f-kon-phone" type="text" placeholder="Contoh: 089xxxxxxxxx" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" required>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm mt-2 text-white bg-blue-600 hover:bg-blue-700 shadow-md transition">SIMPAN KONTAK</button>
+      </form>
+    </div>
+  </div>
+
+
+  <script>
+    // Inisialisasi Database Menggunakan LocalStorage
+    let db = JSON.parse(localStorage.getItem('X_PLKV_DB')) || {
+      tugas: [], absen: [], pengumuman: [], catatan: [], kas: [], galeri: [], guru: [], kontak: []
+    };
+
+    function saveDB() {
+      localStorage.setItem('X_PLKV_DB', JSON.stringify(db));
+      renderAll();
+    }
+
+    // Navigasi Tab Utama
+    document.querySelectorAll('.view-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('view-tab-active'));
+        document.querySelectorAll('.view-content').forEach(c => c.classList.add('hidden'));
+        
+        btn.classList.add('view-tab-active');
+        const targetView = document.getElementById(`view-${btn.dataset.view}`);
+        if(targetView) targetView.classList.remove('hidden');
+      });
+    });
+
+    // Penyaringan Mapel Tugas
+    let selectedSubject = 'all';
+    document.querySelectorAll('.subject-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.subject-tab').forEach(b => {
+          b.classList.remove('tab-active');
+          b.classList.add('bg-slate-50', 'text-slate-600');
+        });
+        btn.classList.add('tab-active');
+        btn.classList.remove('bg-slate-50', 'text-slate-600');
+        selectedSubject = btn.dataset.subject;
+        renderTugas();
+      });
+    });
+
+    // Manajemen Jendela Modal
+    function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // Fungsi Pembantu Konversi File Gambar Ke Base64 string
+    function getBase64(file) {
+      return new Promise((resolve, reject) => {
+        if(!file) resolve("");
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    // Submit Handling Form
+    async function handleTaskSubmit(e) {
+      e.preventDefault();
+      const imgFile = document.getElementById('f-task-img').files[0];
+      const imgBase64 = imgFile ? await getBase64(imgFile) : "";
+
+      const newTask = {
+        id: Date.now(),
+        subject: document.getElementById('f-subject').value,
+        title: document.getElementById('f-title').value,
+        desc: document.getElementById('f-desc').value,
+        date: document.getElementById('f-date').value,
+        time: document.getElementById('f-time').value,
+        priority: document.getElementById('f-priority').value,
+        done: false,
+        image: imgBase64
+      };
+      db.tugas.push(newTask);
+      saveDB();
+      e.target.reset();
+      hideModal('task-modal');
+    }
+
+    function handleAbsenSubmit(e) {
+      e.preventDefault();
+      db.absen.push({
+        id: Date.now(),
+        name: document.getElementById('f-name').value,
+        status: document.getElementById('f-status').value,
+        timestamp: new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})
+      });
+      saveDB();
+      e.target.reset();
+      hideModal('absen-modal');
+    }
+
+    function handleAnnounceSubmit(e) {
+      e.preventDefault();
+      db.pengumuman.push({
+        id: Date.now(),
+        title: document.getElementById('f-ann-title').value,
+        desc: document.getElementById('f-ann-desc').value,
+        date: new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})
+      });
+      saveDB();
+      e.target.reset();
+      hideModal('announce-modal');
+    }
+
+    function handleNoteSubmit(e) {
+      e.preventDefault();
+      db.catatan.push({
+        id: Date.now(),
+        subject: document.getElementById('f-note-subject').value,
+        content: document.getElementById('f-note-content').value
+      });
+      saveDB();
+      e.target.reset();
+      hideModal('note-modal');
+    }
+
+    function handleKasSubmit(e) {
+      e.preventDefault();
+      db.kas.push({
+        id: Date.now(),
+        type: document.getElementById('f-kas-type').value,
+        name: document.getElementById('f-kas-name').value,
+        amount: parseInt(document.getElementById('f-kas-amount').value) || 0
+      });
+      saveDB();
+      e.target.reset();
+      hideModal('kas-modal');
+    }
+
+    async function handleGaleriSubmit(e) {
+      e.preventDefault();
+      const imgFile = document.getElementById('f-gal-img').files[0];
+      const imgBase64 = imgFile ? await getBase64(imgFile) : "";
+      if(imgBase64) {
+        db.galeri.push({ id: Date.now(), title: document.getElementById('f-gal-title').value, image: imgBase64 });
+        saveDB();
+      }
+      e.target.reset();
+      hideModal('galeri-modal');
+    }
+
+    function handleGuruSubmit(e) {
+      e.preventDefault();
+      db.guru.push({
+        id: Date.now(),
+        name: document.getElementById('f-guru-name').value,
+        subject: document.getElementById('f-guru-subject').value,
+        phone: document.getElementById('f-guru-phone').value || "-"
+      });
+      saveDB();
+      e.target.reset();
+      hideModal('guru-modal');
+    }
+
+    function handleKontakSubmit(e) {
+      e.preventDefault();
+      db.kontak.push({
+        id: Date.now(),
+        name: document.getElementById('f-kon-name').value,
+        role: document.getElementById('f-kon-role').value,
+        phone: document.getElementById('f-kon-phone').value
+      });
+      saveDB();
+      e.target.reset();
+      hideModal('kontak-modal');
+    }
+
+    // Sistem Aksi Hapus & Centang Data
+    function toggleTask(id) {
+      db.tugas = db.tugas.map(t => t.id === id ? {...t, done: !t.done} : t);
+      saveDB();
+    }
+
+    function deleteItem(type, id) {
+      db[type] = db[type].filter(item => item.id !== id);
+      saveDB();
+    }
+
+    function clearData(type) {
+      db[type] = [];
+      saveDB();
+    }
+
+    // SISTEM RENDERING VISUAL KOMPONEN ELEMEN
+    function renderTugas() {
+      const list = document.getElementById('task-list');
+      const empty = document.getElementById('empty-msg');
+      list.innerHTML = "";
+      
+      const filtered = db.tugas.filter(t => selectedSubject === 'all' || t.subject === selectedSubject);
+      
+      if(filtered.length === 0) {
+        empty.classList.remove('hidden');
+      } else {
+        empty.classList.add('hidden');
+        filtered.forEach(t => {
+          const div = document.createElement('div');
+          div.className = `bg-white rounded-2xl p-5 border border-slate-100 shadow-sm relative transition hover:shadow-md priority-${t.priority} ${t.done ? 'task-done' : ''}`;
+          div.innerHTML = `
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded bg-slate-100 text-slate-600">${t.subject}</span>
+                <h3 class="font-bold text-slate-900 mt-1.5 leading-snug">${t.title}</h3>
+              </div>
+              <button onclick="deleteItem('tugas', ${t.id})" class="text-slate-300 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+            <p class="text-xs text-slate-500 font-medium mb-4 line-clamp-3">${t.desc || 'Tidak ada deskripsi tambahan.'}</p>
+            ${t.image ? `<img src="${t.image}" class="w-full h-32 object-cover rounded-xl mb-3 border">` : ''}
+            <div class="flex items-center justify-between border-t border-slate-100 pt-3 mt-2">
+              <div class="flex items-center gap-1.5 text-slate-400">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                <span class="text-[11px] font-bold">${t.date} &bull; ${t.time}</span>
+              </div>
+              <button onclick="toggleTask(${t.id})" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition ${t.done ? 'bg-slate-100 text-slate-500' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}">
+                <i data-lucide="${t.done ? 'rotate-ccw' : 'check'}" class="w-3.5 h-3.5"></i> ${t.done ? 'Batal' : 'Selesai'}
+              </button>
+            </div>
+          `;
+          list.appendChild(div);
+        });
+      }
+      lucide.createIcons();
+    }
+
+    function renderAll() {
+      // 1. Dashboard Counter Statis
+      document.getElementById('stat-total-num').innerText = db.tugas.length;
+      document.getElementById('stat-done-num').innerText = db.tugas.filter(t => t.done).length;
+      document.getElementById('stat-urgent-num').innerText = db.tugas.filter(t => t.priority === 'urgent' && !t.done).length;
+      document.getElementById('stat-attend-num').innerText = db.absen.filter(a => a.status === 'Hadir').length;
+
+      // 2. Deadline Monitor Paling Dekat
+      const activeDeadlines = db.tugas.filter(t => !t.done).sort((a,b) => new Date(a.date) - new Date(b.date));
+      if(activeDeadlines.length > 0) {
+        document.getElementById('countdown-text').innerHTML = `<span class="text-rose-600 font-extrabold">[${activeDeadlines[0].subject}]</span> ${activeDeadlines[0].title} - Batas: ${activeDeadlines[0].date}`;
+      } else {
+        document.getElementById('countdown-text').innerText = "Tidak ada deadline aktif, kelas aman terkendali!";
+      }
+
+      // Render Sub-Sistem Modul View
+      renderTugas();
+
+      // Mading Pengumuman
+      const annList = document.getElementById('announce-list');
+      document.getElementById('announce-empty').className = db.pengumuman.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
+      annList.innerHTML = "";
+      db.pengumuman.forEach(p => {
+        annList.innerHTML += `
+          <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex justify-between items-start">
+            <div>
+              <div class="flex items-center gap-2 mb-1"><span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">${p.date}</span></div>
+              <h4 class="font-bold text-slate-800 text-sm">${p.title}</h4>
+              <p class="text-xs text-slate-500 mt-1 whitespace-pre-line">${p.desc}</p>
+            </div>
+            <button onclick="deleteItem('pengumuman', ${p.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        `;
+      });
+
+      // Catatan Rangkuman
+      const noteList = document.getElementById('note-list');
+      document.getElementById('note-empty').className = db.catatan.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
+      noteList.innerHTML = "";
+      db.catatan.forEach(n => {
+        noteList.innerHTML += `
+          <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-100 relative group shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-violet-700 uppercase">${n.subject}</span>
+              <button onclick="deleteItem('catatan', ${n.id})" class="text-slate-300 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+            <p class="text-xs text-slate-700 font-medium whitespace-pre-line leading-relaxed">${n.content}</p>
+          </div>
+        `;
+      });
+
+      // Absen Log List
+      const abList = document.getElementById('absen-list');
+      document.getElementById('absen-empty').className = db.absen.length === 0 ? "text-center py-8 text-slate-400 text-sm italic" : "hidden";
+      abList.innerHTML = "";
+      db.absen.forEach(a => {
+        let badgeColor = "bg-emerald-100 text-emerald-800";
+        if(a.status === "Izin") badgeColor = "bg-blue-100 text-blue-800";
+        if(a.status === "Sakit") badgeColor = "bg-amber-100 text-amber-800";
+        if(a.status === "Alpha") badgeColor = "bg-rose-100 text-rose-800";
+
+        abList.innerHTML += `
+          <div class="py-3 flex items-center justify-between text-sm">
+            <div class="flex items-center gap-3">
+              <span class="w-2 h-2 rounded-full ${a.status === 'Hadir'?'bg-emerald-500':'bg-rose-400'}"></span>
+              <span class="font-semibold text-slate-800">${a.name}</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="text-xs px-2 py-0.5 rounded-full font-bold ${badgeColor}">${a.status}</span>
+              <span class="text-xs text-slate-400 font-medium">${a.timestamp}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Kas Keuangan
+      const kasList = document.getElementById('kas-list');
+      document.getElementById('kas-empty').className = db.kas.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
+      kasList.innerHTML = "";
+      let totalSaldo = 0;
+      db.kas.forEach(k => {
+        if(k.type === 'masuk') totalSaldo += k.amount;
+        else totalSaldo -= k.amount;
+
+        kasList.innerHTML += `
+          <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="p-2 rounded-lg ${k.type === 'masuk' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
+                <i data-lucide="${k.type === 'masuk' ? 'trending-up' : 'trending-down'}" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h5 class="text-xs font-bold text-slate-800">${k.name}</h5>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">${k.type}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <span class="text-xs font-bold ${k.type === 'masuk' ? 'text-emerald-600' : 'text-rose-600'}">
+                ${k.type === 'masuk' ? '+' : '-'} Rp ${k.amount.toLocaleString('id-ID')}
+              </span>
+              <button onclick="deleteItem('kas', ${k.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('kas-saldo').innerText = `Rp ${totalSaldo.toLocaleString('id-ID')}`;
+
+      // Galeri Foto Dokumentasi Kegiatan
+      const galList = document.getElementById('galeri-list');
+      document.getElementById('galeri-empty').className = db.galeri.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
+      galList.innerHTML = "";
+      db.galeri.forEach(g => {
+        galList.innerHTML += `
+          <div class="bg-white rounded-xl border p-2 shadow-sm relative group overflow-hidden">
+            <img src="${g.image}" class="w-full h-32 object-cover rounded-lg">
+            <div class="mt-2 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-700 truncate block max-w-[80%]">${g.title}</span>
+              <button onclick="deleteItem('galeri', ${g.id})" class="text-slate-300 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+        `;
+      });
+
+      // Data Guru Pengajar
+      const guList = document.getElementById('guru-list');
+      document.getElementById('guru-empty').className = db.guru.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
+      guList.innerHTML = "";
+      db.guru.forEach(gu => {
+        guList.innerHTML += `
+          <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs"><i data-lucide="user" class="w-4 h-4"></i></div>
+              <div>
+                <h4 class="font-bold text-slate-900 text-xs">${gu.name}</h4>
+                <p class="text-[11px] text-indigo-600 font-bold tracking-wide uppercase mt-0.5">${gu.subject}</p>
+                <span class="text-[11px] text-slate-400 font-medium block mt-1"><i data-lucide="phone" class="w-3 h-3 inline mr-1"></i>${gu.phone}</span>
+              </div>
+            </div>
+            <button onclick="deleteItem('guru', ${gu.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        `;
+      });
+
+      // Buku Kontak Teman Kelas
+      const konList = document.getElementById('kontak-list');
+      document.getElementById('kontak-empty').className = db.kontak.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
+      konList.innerHTML = "";
+      db.kontak.forEach(ko => {
+        konList.innerHTML += `
+          <div class="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm flex justify-between items-center">
+            <div>
+              <h4 class="font-bold text-slate-800 text-xs">${ko.name}</h4>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 inline-block mt-1">${ko.role}</span>
+              <span class="text-[11px] text-slate-400 block mt-1.5 font-medium"><i data-lucide="phone" class="w-3 h-3 inline mr-1"></i>${ko.phone}</span>
+            </div>
+            <button onclick="deleteItem('kontak', ${ko.id})" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        `;
+      });
+
+      lucide.createIcons();
+    }
+
+    // Pemanggilan Awal saat Website Pertama Kali Dimuat
+    window.onload = renderAll;
+  </script>
+</body>
+</html>
