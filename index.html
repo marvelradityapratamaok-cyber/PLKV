@@ -942,7 +942,7 @@
         noteList.innerHTML += `<div class="bg-amber-50/60 p-4 rounded-xl border border-amber-100 relative shadow-sm"><div class="flex justify-between items-center mb-2"><span class="text-xs font-bold text-violet-700 uppercase">${n.subject}</span><button onclick="deleteItem('catatan', '${n.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><p class="text-xs text-slate-700 font-medium whitespace-pre-line">${n.content}</p></div>`;
       });
 
-      // Absen Log Card View (With Photo Support)
+      // Absen Log Card View
       const abList = document.getElementById('absen-list');
       document.getElementById('absen-empty').className = db.absen.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
       abList.innerHTML = "";
@@ -1031,12 +1031,29 @@
         curhatList.innerHTML += `<div class="bg-white p-4 rounded-xl border border-fuchsia-100 shadow-sm flex flex-col justify-between"><p class="text-xs text-slate-700 italic font-medium whitespace-pre-line">"${c.text}"</p><div class="flex justify-between items-center mt-4 pt-2 border-t border-slate-50"><span class="text-[10px] font-bold text-fuchsia-500 bg-fuchsia-50 px-2 py-0.5 rounded-full"><i data-lucide="user-x" class="w-3 h-3 inline mr-1"></i>Anonymous</span><div class="flex items-center gap-2"><span class="text-[10px] text-slate-400">${c.date}</span><button onclick="deleteItem('curhat', '${c.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div></div>`;
       });
 
-      // Galeri Foto
+      // Galeri Foto Berfitur Download Otomatis Base64
       const galList = document.getElementById('galeri-list');
       document.getElementById('galeri-empty').className = db.galeri.length === 0 ? "text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200" : "hidden";
       galList.innerHTML = "";
       db.galeri.forEach(g => {
-        galList.innerHTML += `<div class="bg-white rounded-xl border p-2 shadow-sm"><img src="${g.image}" class="w-full h-32 object-cover rounded-lg"><div class="mt-2 flex items-center justify-between"><span class="text-xs font-bold text-slate-700 truncate max-w-[80%] block">${g.title}</span><button onclick="deleteItem('galeri', '${g.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>`;
+        const itemDiv = document.createElement('div');
+        itemDiv.className = "bg-white rounded-xl border p-2 shadow-sm flex flex-col justify-between";
+        
+        itemDiv.innerHTML = `
+          <div>
+            <img src="${g.image}" class="w-full h-32 object-cover rounded-lg">
+            <div class="mt-2 flex items-center justify-between gap-1">
+              <span class="text-xs font-bold text-slate-700 truncate max-w-[70%] block">${g.title}</span>
+              <button onclick="deleteItem('galeri', '${g.id}')" class="text-slate-300 hover:text-rose-500 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-50">
+            <a href="${g.image}" download="${g.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png" class="w-full py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold rounded-lg transition flex items-center justify-center gap-1">
+              <i data-lucide="download" class="w-3 h-3"></i> UNDUH FOTO
+            </a>
+          </div>
+        `;
+        galList.appendChild(itemDiv);
       });
 
       // Data Guru
