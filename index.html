@@ -337,8 +337,8 @@
           <textarea id="f-desc" rows="3" placeholder="Deskripsi..." class="w-full border bg-slate-50 rounded-xl px-3 py-2.5 text-sm"></textarea>
         </div>
         <div>
-          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Foto Lampiran (Opsional)</label>
-          <input id="f-task-img" type="file" accept="image/*" class="w-full text-xs border bg-slate-50 rounded-xl px-3 py-2">
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Foto Lampiran (Bisa Banyak Foto / Opsional)</label>
+          <input id="f-task-img" type="file" accept="image/*" class="w-full text-xs border bg-slate-50 rounded-xl px-3 py-2" multiple>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Tanggal</label><input id="f-date" type="date" class="w-full border bg-slate-50 rounded-xl px-3 py-2.5 text-sm" required></div>
@@ -728,13 +728,21 @@
       const tit = document.getElementById('f-title').value;
       const tgl = document.getElementById('f-date').value;
       const jam = document.getElementById('f-time').value;
-      const imgFile = document.getElementById('f-task-img').files[0];
-      const imgBase64 = imgFile ? await getBase64(imgFile) : "";
+      
+      const fileInput = document.getElementById('f-task-img');
+      let imagesArray = [];
+      
+      if (fileInput.files && fileInput.files.length > 0) {
+        for (let i = 0; i < fileInput.files.length; i++) {
+          const base64Str = await getBase64(fileInput.files[i]);
+          imagesArray.push(base64Str);
+        }
+      }
       
       await addDoc(collection(firestoreDb, 'tugas'), {
         subject: sub, title: tit, desc: document.getElementById('f-desc').value,
         date: tgl, time: jam, priority: document.getElementById('f-priority').value,
-        image: imgBase64, done: false, createdAt: Date.now()
+        images: imagesArray, done: false, createdAt: Date.now()
       });
 
       if(confirm("Tugas disimpan! Kirim info tugas baru ini ke WhatsApp kamu?")) {
@@ -924,6 +932,18 @@
         filtered.forEach(t => {
           const div = document.createElement('div');
           div.className = `bg-white rounded-2xl p-5 border border-slate-100 shadow-sm relative transition hover:shadow-md priority-${t.priority} ${t.done ? 'task-done' : ''}`;
+          
+          let imageRenderHtml = "";
+          if (t.images && Array.isArray(t.images) && t.images.length > 0) {
+            imageRenderHtml = `<div class="grid grid-cols-2 gap-2 mb-3">`;
+            t.images.forEach(imgData => {
+              imageRenderHtml += `<img src="${imgData}" class="w-full h-24 object-cover rounded-xl border">`;
+            });
+            imageRenderHtml += `</div>`;
+          } else if (t.image) {
+            imageRenderHtml = `<img src="${t.image}" class="w-full h-32 object-cover rounded-xl mb-3 border">`;
+          }
+
           div.innerHTML = `
             <div class="flex items-start justify-between gap-4 mb-2">
               <div>
@@ -933,7 +953,7 @@
               <button onclick="deleteItem('tugas', '${t.id}')" class="text-slate-300 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
             <p class="text-xs text-slate-500 mb-4 line-clamp-3">${t.desc || 'Tidak ada deskripsi.'}</p>
-            ${t.image ? `<img src="${t.image}" class="w-full h-32 object-cover rounded-xl mb-3 border">` : ''}
+            ${imageRenderHtml}
             <div class="flex items-center justify-between border-t border-slate-100 pt-3 mt-2">
               <div class="flex items-center gap-1.5 text-slate-400"><i data-lucide="calendar" class="w-3.5 h-3.5"></i><span class="text-[11px] font-bold">${t.date} &bull; ${t.time}</span></div>
               <button onclick="toggleTask('${t.id}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${t.done ? 'bg-slate-100 text-slate-500' : 'bg-blue-50 text-blue-600'}">
