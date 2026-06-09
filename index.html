@@ -350,7 +350,7 @@
             <option value="biasa">Biasa (Biru)</option><option value="urgent">Urgent (Merah)</option><option value="rendah">Rendah (Hijau)</option>
           </select>
         </div>
-        <button id="task-submit-btn" type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md">SIMPAN TUGAS KELAS</button>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md">SIMPAN TUGAS KELAS</button>
       </form>
     </div>
   </div>
@@ -382,7 +382,7 @@
           <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Foto Bukti Presensi (Wajib)</label>
           <input id="f-absen-img" type="file" accept="image/*" class="w-full text-xs border bg-slate-50 rounded-xl px-3 py-2" required>
         </div>
-        <button id="absen-submit-btn" type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-md">KIRIM ABSENSI</button>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-md">KIRIM ABSENSI</button>
       </form>
     </div>
   </div>
@@ -469,7 +469,7 @@
           <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Foto Bukti Pembayaran (Wajib)</label>
           <input id="f-kas-img" type="file" accept="image/*" class="w-full text-xs border bg-slate-50 rounded-xl px-3 py-2" required>
         </div>
-        <button id="kas-submit-btn" type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-md">INPUT TRANSAKSI</button>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-md">INPUT TRANSAKSI</button>
       </form>
     </div>
   </div>
@@ -496,7 +496,7 @@
           <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Pilih File</label>
           <input id="f-gal-img" type="file" accept="image/*" class="w-full text-xs border bg-slate-50 rounded-xl px-3 py-2" required>
         </div>
-        <button id="galeri-submit-btn" type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md">UNGGAH SEKARANG</button>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md">UNGGAH SEKARANG</button>
       </form>
     </div>
   </div>
@@ -535,7 +535,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDYMsohQFwqJG5O64yTng84ypYu0_587e4",
@@ -549,7 +548,6 @@
 
     const app = initializeApp(firebaseConfig);
     const firestoreDb = getFirestore(app);
-    const storage = getStorage(app);
 
     const NO_WA_SAYA = "6281945497854";       
     const NO_WA_WALI_KELAS = "6281317539378"; 
@@ -576,19 +574,52 @@
       document.getElementById('quote-author').innerText = `— ${currentQuote.author}`;
     }
 
-    // Fungsi Upload Tunggal Cloud Storage Tanpa Batasan Ukuran
-    function uploadFileCloud(file, pathFolder) {
+    function getBase64(file) {
       return new Promise((resolve, reject) => {
-        if (!file) return resolve("");
-        const namaFileUnik = `${Date.now()}_${file.name}`;
-        const storageRef = ref(storage, `${pathFolder}/${namaFileUnik}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        // Jika file adalah gambar, kompres ukurannya agar muat di memori Firestore
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const MAX_WIDTH = 800; // Skala lebar maksimum gambar
+              const MAX_HEIGHT = 600; // Skala tinggi maksimum gambar
+              let width = img.width;
+              let height = img.height;
 
-        uploadTask.on('state_changed', 
-          null, 
-          (error) => { console.error(error); reject(error); }, 
-          () => { getDownloadURL(uploadTask.snapshot.ref).then((url) => resolve(url)); }
-        );
+              if (width > height) {
+                if (width > MAX_WIDTH) {
+                  height *= MAX_WIDTH / width;
+                  width = MAX_WIDTH;
+                }
+              } else {
+                if (height > MAX_HEIGHT) {
+                  width *= MAX_HEIGHT / height;
+                  height = MAX_HEIGHT;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // Kompresi kualitas gambar menjadi 70% (0.7)
+              const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+              resolve(compressedBase64);
+            };
+          };
+          reader.onerror = error => reject(error);
+        } else {
+          // Jika file selain gambar (seperti video pendek), baca biasa
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        }
       });
     }
 
@@ -733,9 +764,6 @@
 
     window.handleTaskSubmit = async function(e) {
       e.preventDefault();
-      const btn = document.getElementById('task-submit-btn');
-      btn.innerText = "MENGUNGGAH... SILAKAN TUNGGU"; btn.disabled = true;
-
       const sub = document.getElementById('f-subject').value;
       const tit = document.getElementById('f-title').value;
       const tgl = document.getElementById('f-date').value;
@@ -744,27 +772,24 @@
       const fileInput = document.getElementById('f-task-img');
       let imagesArray = [];
       
-      try {
-        if (fileInput.files && fileInput.files.length > 0) {
-          for (let i = 0; i < fileInput.files.length; i++) {
-            const urlFile = await uploadFileCloud(fileInput.files[i], 'tugas');
-            if(urlFile) imagesArray.push(urlFile);
-          }
+      if (fileInput.files && fileInput.files.length > 0) {
+        for (let i = 0; i < fileInput.files.length; i++) {
+          const base64Str = await getBase64(fileInput.files[i]);
+          imagesArray.push(base64Str);
         }
-        
-        await addDoc(collection(firestoreDb, 'tugas'), {
-          subject: sub, title: tit, desc: document.getElementById('f-desc').value,
-          date: tgl, time: jam, priority: document.getElementById('f-priority').value,
-          images: imagesArray, done: false, createdAt: Date.now()
-        });
+      }
+      
+      await addDoc(collection(firestoreDb, 'tugas'), {
+        subject: sub, title: tit, desc: document.getElementById('f-desc').value,
+        date: tgl, time: jam, priority: document.getElementById('f-priority').value,
+        images: imagesArray, done: false, createdAt: Date.now()
+      });
 
-        if(confirm("Tugas disimpan! Kirim info tugas baru ini ke WhatsApp kamu?")) {
-          const textWA = `*ADA TUGAS BARU DI WEB KELAS!*\n\nMapel: *${sub}*\nJudul: ${tit}\nDeadline: ${tgl} jam ${jam}\n\n_Buka web kelas untuk detailnya!_`;
-          window.open(`https://wa.me/${NO_WA_SAYA}?text=${encodeURIComponent(textWA)}`, '_blank');
-        }
-        e.target.reset(); hideModal('task-modal');
-      } catch (err) { alert("Gagal menyimpan tugas."); }
-      finally { btn.innerText = "SIMPAN TUGAS KELAS"; btn.disabled = false; }
+      if(confirm("Tugas disimpan! Kirim info tugas baru ini ke WhatsApp kamu?")) {
+        const textWA = `*ADA TUGAS BARU DI WEB KELAS!*\n\nMapel: *${sub}*\nJudul: ${tit}\nDeadline: ${tgl} jam ${jam}\n\n_Buka web kelas untuk detailnya!_`;
+        window.open(`https://wa.me/${NO_WA_SAYA}?text=${encodeURIComponent(textWA)}`, '_blank');
+      }
+      e.target.reset(); hideModal('task-modal');
     }
 
     window.handlePiketSubmit = async function(e) {
@@ -778,26 +803,19 @@
 
     window.handleAbsenSubmit = async function(e) {
       e.preventDefault();
-      const btn = document.getElementById('absen-submit-btn');
-      btn.innerText = "MENGIRIM..."; btn.disabled = true;
-
       const nm = document.getElementById('f-name').value;
       const st = document.getElementById('f-status').value;
       const imgFile = document.getElementById('f-absen-img').files[0];
+      const imgBase64 = imgFile ? await getBase64(imgFile) : "";
+      const skrg = new Date();
+      const tanggalStr = skrg.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      const jamMinit = String(skrg.getHours()).padStart(2, '0') + ':' + String(skrg.getMinutes()).padStart(2, '0');
       
-      try {
-        const urlFile = await uploadFileCloud(imgFile, 'absen');
-        const skrg = new Date();
-        const tanggalStr = skrg.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-        const jamMinit = String(skrg.getHours()).padStart(2, '0') + ':' + String(skrg.getMinutes()).padStart(2, '0');
-        
-        await addDoc(collection(firestoreDb, 'absen'), {
-          name: nm, status: st, image: urlFile, timestamp: jamMinit, 
-          dateString: `${tanggalStr}, ${jamMinit} WIB`, createdAt: Date.now()
-        });
-        e.target.reset(); hideModal('absen-modal');
-      } catch (err) { alert("Gagal mengirim absensi."); }
-      finally { btn.innerText = "KIRIM ABSENSI"; btn.disabled = false; }
+      await addDoc(collection(firestoreDb, 'absen'), {
+        name: nm, status: st, image: imgBase64, timestamp: jamMinit, 
+        dateString: `${tanggalStr}, ${jamMinit} WIB`, createdAt: Date.now()
+      });
+      e.target.reset(); hideModal('absen-modal');
     }
 
     window.handleAnnounceSubmit = async function(e) {
@@ -831,50 +849,36 @@
 
     window.handleKasSubmit = async function(e) {
       e.preventDefault();
-      const btn = document.getElementById('kas-submit-btn');
-      btn.innerText = "MEMPROSES TRANSAKSI..."; btn.disabled = true;
-
       const type = document.getElementById('f-kas-type').value;
       const name = document.getElementById('f-kas-name').value;
       const amount = parseInt(document.getElementById('f-kas-amount').value || 0);
       const imgFile = document.getElementById('f-kas-img').files[0];
-      
-      try {
-        const urlFile = await uploadFileCloud(imgFile, 'kas');
-        const skrg = new Date();
-        const tanggalStr = skrg.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-        const jamStr = String(skrg.getHours()).padStart(2, '0') + ':' + String(skrg.getMinutes()).padStart(2, '0');
+      const imgBase64 = imgFile ? await getBase64(imgFile) : "";
+      const skrg = new Date();
+      const tanggalStr = skrg.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      const jamStr = String(skrg.getHours()).padStart(2, '0') + ':' + String(skrg.getMinutes()).padStart(2, '0');
 
-        await addDoc(collection(firestoreDb, 'kas'), {
-          type: type, name: name, amount: amount, image: urlFile,
-          dateString: `${tanggalStr}, ${jamStr} WIB`, createdAt: Date.now()
-        });
-        e.target.reset(); hideModal('kas-modal');
-      } catch (err) { alert("Gagal memasukkan transaksi."); }
-      finally { btn.innerText = "INPUT TRANSAKSI"; btn.disabled = false; }
+      await addDoc(collection(firestoreDb, 'kas'), {
+        type: type, name: name, amount: amount, image: imgBase64,
+        dateString: `${tanggalStr}, ${jamStr} WIB`, createdAt: Date.now()
+      });
+      e.target.reset(); hideModal('kas-modal');
     }
 
     window.handleGaleriSubmit = async function(e) {
       e.preventDefault();
-      const btn = document.getElementById('galeri-submit-btn');
-      btn.innerText = "MENGOUTPUT FILE KE CLOUD STORAGE..."; btn.disabled = true;
-
       const title = document.getElementById('f-gal-title').value;
       const fileType = document.getElementById('f-gal-type').value;
       const imgFile = document.getElementById('f-gal-img').files[0];
-      
-      try {
-        const urlFile = await uploadFileCloud(imgFile, 'galeri');
-        if(urlFile) {
-          await addDoc(collection(firestoreDb, 'galeri'), {
-            title: title, image: urlFile, fileType: fileType, createdAt: Date.now()
-          });
-        }
-        e.target.reset(); 
-        document.getElementById('f-gal-img').accept = "image/*";
-        hideModal('galeri-modal');
-      } catch (err) { alert("Gagal mengunggah dokumentasi."); }
-      finally { btn.innerText = "UNGGAH SEKARANG"; btn.disabled = false; }
+      const imgBase64 = imgFile ? await getBase64(imgFile) : "";
+      if(imgBase64) {
+        await addDoc(collection(firestoreDb, 'galeri'), {
+          title: title, image: imgBase64, fileType: fileType, createdAt: Date.now()
+        });
+      }
+      e.target.reset(); 
+      document.getElementById('f-gal-img').accept = "image/*";
+      hideModal('galeri-modal');
     }
 
     window.handleGuruSubmit = async function(e) {
@@ -1137,7 +1141,7 @@
                 </div>
                 <button onclick="deleteItem('absen', '${a.id}')" class="text-slate-300 hover:text-rose-500 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
               </div>
-              ${a.image ? (a.image.includes('.mp4') || a.image.includes('video') ? `<video src="${a.image}" controls class="w-full h-32 object-cover rounded-xl mb-3 border border-slate-100 bg-black"></video>` : `<img src="${a.image}" class="w-full h-32 object-cover rounded-xl mb-3 border border-slate-100">`) : '<div class="w-full h-32 bg-slate-50 flex items-center justify-center text-slate-300 rounded-xl mb-3 border border-dashed text-xs italic">Tanpa foto lampiran</div>'}
+              ${a.image ? `<img src="${a.image}" class="w-full h-32 object-cover rounded-xl mb-3 border border-slate-100">` : '<div class="w-full h-32 bg-slate-50 flex items-center justify-center text-slate-300 rounded-xl mb-3 border border-dashed text-xs italic">Tanpa foto lampiran</div>'}
             </div>
             <div class="flex items-center justify-between pt-2 border-t border-slate-50 mt-1">
               <span class="text-[10px] text-slate-400 font-semibold"><i data-lucide="clock" class="w-3 h-3 inline mr-0.5"></i>${tanggalTampil}</span>
@@ -1196,7 +1200,7 @@
             </div>
           </div>
           <div class="mt-2 pt-2 border-t border-slate-50">
-            <a href="${g.image}" target="_blank" download="${g.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${isVideo ? 'mp4' : 'png'}" class="w-full py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold rounded-lg transition flex items-center justify-center gap-1">
+            <a href="${g.image}" download="${g.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${isVideo ? 'mp4' : 'png'}" class="w-full py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold rounded-lg transition flex items-center justify-center gap-1">
               <i data-lucide="download" class="w-3 h-3"></i> UNDUH ${isVideo ? 'VIDEO' : 'FOTO'}
             </a>
           </div>
